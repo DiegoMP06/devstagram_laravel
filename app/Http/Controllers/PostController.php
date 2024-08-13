@@ -6,64 +6,61 @@ use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth')->except(['show', 'index']);
-    }
-
-    public function index(User $user) 
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(User $user)
     {
         $posts = Post::where('user_id', $user->id)->latest()->paginate(20);
 
         return view('dashboard', [
             "user" => $user,
-            'posts' => $posts,
+            "posts" => $posts
         ]);
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
         return view("posts.create");
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
-        $this->validate($request, [
-            'titulo' => ['required', 'max:255'],
-            'descripcion' => ['required', 'max:500'],
-            'imagen' => ['required'],
+        $request->validate([
+            'title' => ['required', 'max:255'],
+            'description' => ['required', 'max:500'],
+            'image' => ['required'],
+        ], [
+            'title.required' => 'El tiúlo es obligatorio.',
+            'title.max' => 'El tiúlo no debe superar los 255 caracteres.',
+            'description.required' => 'La descripción es obligatoria.',
+            'description.max' => 'La descripción no debe superar los 500 caracteres.',
+            'image.required' => 'La imagen es obligatoria.',
         ]);
 
-        // Post::create([
-        //     'titulo' => $request->titulo,
-        //     'descripcion' => $request->descripcion,
-        //     'imagen' => $request->imagen,
-        //     'user_id' => auth()->user()->id,
-        // ]);
-
-        // Otra Forma de Guardar Datos
-
-        // $post = new Post;
-        // $post->titulo = $request->titulo;
-        // $post->descripcion = $request->descripcion;
-        // $post->imagen = $request->imagen;
-        // $post->user_id = auth()->user()->id;
-        // $post->save();
 
         $request->user()->posts()->create([
-            'titulo' => $request->titulo,
-            'descripcion' => $request->descripcion,
-            'imagen' => $request->imagen,
-            'user_id' => auth()->user()->id,
+            'title' => $request->title,
+            'description' => $request->description,
+            'image' => $request->image
         ]);
 
-        return redirect()->route('post.index', auth()->user()->username);
+        return redirect()->route('posts.index', auth()->user());
     }
 
-
+    /**
+     * Display the specified resource.
+     */
     public function show(User $user, Post $post)
     {
         return view('posts.show', [
@@ -72,18 +69,15 @@ class PostController extends Controller
         ]);
     }
 
-    public function destroy(Post $post) 
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(User $user, Post $post)
     {
-        $this->authorize('delete', $post);
-        
+        $image = $post->image;
         $post->delete();
-
-        $imagen_path = public_path('uploads/' . $post->imagen);
-
-        if(File::exists($imagen_path)) {
-            unlink($imagen_path);
-        }
-
-        return redirect()->route('post.index', auth()->user()->username);
+        Storage::delete('uploads/'. $image);
+        
+        return redirect()->route('posts.index', auth()->user());
     }
 }

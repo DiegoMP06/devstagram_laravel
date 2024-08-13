@@ -1,7 +1,8 @@
+import './bootstrap';
+
 import Dropzone from "dropzone";
 
 if(document.querySelector('#dropzone')) {
-    
     Dropzone.autoDiscover = false;
 
     const dropzone = new Dropzone('#dropzone', {
@@ -13,7 +14,7 @@ if(document.querySelector('#dropzone')) {
         uploadMultiple: false,
 
         init: function() {
-            const inputHidden = document.querySelector('input#imagen');
+            const inputHidden = document.querySelector('input#image');
 
             if (inputHidden && inputHidden.value.trim()) {
                 const imagenPublicada = {};
@@ -21,20 +22,20 @@ if(document.querySelector('#dropzone')) {
                 imagenPublicada.name = inputHidden.value.trim();
 
                 this.options.addedfile.call(this, imagenPublicada);
-                this.options.thumbnail.call(this, imagenPublicada, `/uploads/${imagenPublicada.name}`);
+                this.options.thumbnail.call(this, imagenPublicada, `/storage/uploads/${imagenPublicada.name}`);
 
                 imagenPublicada.previewElement.classList.add('dz-success', 'dz-complete');
             }
         }
     });
 
-    dropzone.on('success', (file, response) => {
-        const inputHidden = document.querySelector('input#imagen');
+    dropzone.on('success', (_file, response) => {
+        const inputHidden = document.querySelector('input#image');
         inputHidden.value = response.imagen;
     });
 
     dropzone.on('removedfile', (file) => {
-        const inputHidden = document.querySelector('input#imagen');
+        const inputHidden = document.querySelector('input#image');
         inputHidden.value = '';
     });
 

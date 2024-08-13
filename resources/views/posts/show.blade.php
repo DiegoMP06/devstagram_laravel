@@ -1,27 +1,21 @@
-@extends('layout.app')
-
-@section('titulo')
-    {{ $post->titulo }}
-@endsection
-
-@section('contenido')
+<x-app-layout title="{{ $post->title }}">
     <div class="container mx-auto md:flex">
         <div class="md:w-1/2">
-            <img src="{{ asset('uploads') . '/' . $post->imagen }}" alt="Imagen del Post {{ $post->titulo }}">
+            <img src="{{ asset('storage/uploads') . '/' . $post->image }}" alt="Imagen del Post {{ $post->title }}">
 
-            <livewire:like-post :post="$post" />
+            <livewire:components.like-post :post="$post" />
 
             <div>
-                <a href="{{ route('post.index', $post->user->username) }}" class="font-bold">{{ $post->user->username }}</a>
+                <a href="{{ route('posts.index', $post->user->username) }}" class="font-bold">{{ $post->user->username }}</a>
 
                 <p class="texte-sm text-gray-500">{{ $post->created_at->diffForHumans() }}</p>
 
-                <p class="mt-5">{{ $post->descripcion }}</p>
+                <p class="mt-5">{{ $post->description }}</p>
             </div>
 
             @auth
                 @if ($post->user_id === auth()->user()->id)
-                    <form action="{{ route('post.destroy', $post) }}" method="post">
+                    <form action="{{ route('posts.destroy', [auth()->user(), $post]) }}" method="post">
                         @method('delete')
                         @csrf
                         <input type="submit" value="Eliminar Publicacion"
@@ -36,22 +30,22 @@
                 @auth
                     <p class="text-xl font-bold text-center mb-4">Agrega Un Nuevo Comentario: </p>
 
-                    @if (session('mensaje'))
-                        <p class="bg-green-500 p-2 rounded-lg mb-6 text-white text-center font-bold">{{ session('mensaje') }}
+                    @if (session('message'))
+                        <p class="bg-green-500 p-2 rounded-lg mb-6 text-white text-center font-bold">{{ session('message') }}
                         </p>
                     @endif
 
-                    <form action="{{ route('comentarios.store', ['user' => $user, 'post' => $post]) }}" method="post">
+                    <form action="{{ route('comments.store', ['user' => $user, 'post' => $post]) }}" method="post">
                         @csrf
 
                         <div class="mb-5">
-                            <label for="comentario" class="mb-2 block uppercase text-gray-500 font-bold">Añade un Comentario:
+                            <label for="comment" class="mb-2 block uppercase text-gray-500 font-bold">Añade un Comentario:
                             </label>
 
-                            <textarea name="comentario" id="comentario" placeholder="Agrega un Comentario"
-                                class="border p-3 w-full rounded-lg outline-none @error('comentario') border-red-500 @enderror">{{ old('comentario') }}</textarea>
+                            <textarea name="comment" id="comment" placeholder="Agrega un Comentario"
+                                class="border p-3 w-full rounded-lg outline-none @error('comment') border-red-500 @enderror">{{ old('comment') }}</textarea>
 
-                            @error('comentario')
+                            @error('comment')
                                 <p class="bg-red-500 text-white my-2 rounded-lg text-sm p-2 text-center">{{ $message }}</p>
                             @enderror
                         </div>
@@ -62,15 +56,15 @@
                 @endauth
 
                 <div class="my-10 max-h-96 overflow-y-auto">
-                    @if ($post->comentarios->count())
-                        @foreach ($post->comentarios as $comentario)
+                    @if ($post->comments->count())
+                        @foreach ($post->comments as $comment)
                             <div class="p-5 border-gray-300 border-b">
-                                <a href="{{ route('post.index', $comentario->user->username) }}"
-                                    class="font-bold">{{ $comentario->user->username }}</a>
+                                <a href="{{ route('posts.index', $comment->user->username) }}"
+                                    class="font-bold">{{ $comment->user->username }}</a>
 
-                                <p class="py-1 pl-1">{{ $comentario->comentario }}</p>
+                                <p class="py-1 pl-1">{{ $comment->comment }}</p>
 
-                                <p class="text-sm text-gray-500">{{ $comentario->created_at->diffForHumans() }}</p>
+                                <p class="text-sm text-gray-500">{{ $comment->created_at->diffForHumans() }}</p>
                             </div>
                         @endforeach
                     @else
@@ -80,4 +74,4 @@
             </div>
         </div>
     </div>
-@endsection
+</x-app-layout>

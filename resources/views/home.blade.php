@@ -1,13 +1,7 @@
-@extends('layout.app')
-
-@section('titulo')
-    Pagina Principal
-@endsection
-
-@section('contenido')
-    <x-listar-post :posts="$posts">
+<x-app-layout title="Pagina Principal">
+    <x-posts-list :posts="$posts">
         <x-slot:mensaje>
             No Hay Posts, Sigue a Alguien Para Poder Motrar Sus Posts.
         </x-slot:mensaje>
-    </x-listar-post>
-@endsection
+    </x-posts-list>
+</x-app-layout>

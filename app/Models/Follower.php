@@ -9,17 +9,14 @@ class Follower extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'follower_id',
-    ];
+    protected $fillable = ['user_id', 'follower_id'];
 
-    public function user() 
+    public function user()
     {
         return $this->belongsTo(User::class)->select(['name', 'username', 'email']);
     }
-    
-    public function follower() 
+
+    public function follower()
     {
         return $this->belongsTo(User::class)->select(['name', 'username', 'email']);
     }

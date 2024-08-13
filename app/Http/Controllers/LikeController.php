@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Like;
 use App\Models\Post;
 use Illuminate\Http\Request;
 
 class LikeController extends Controller
 {
-    public function store(Post $post, Request $request) 
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Post $post, Request $request)
     {
         $post->likes()->create([
             'user_id' => $request->user()->id,
@@ -16,7 +21,10 @@ class LikeController extends Controller
         return back();
     }
 
-    public function destroy(Post $post, Request $request) 
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Post $post, Like $like, Request $request)
     {
         $request->user()->likes()->where('post_id', $post->id)->delete();
 

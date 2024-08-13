@@ -10,10 +10,10 @@ class Post extends Model
     use HasFactory;
 
     protected $fillable = [
-        'titulo',
-        'descripcion',
-        'imagen',
-        'user_id'
+        'title',
+        'description',
+        'image',
+        'user_id',
     ];
 
     public function user()
@@ -21,17 +21,17 @@ class Post extends Model
         return $this->belongsTo(User::class)->select(['name', 'username', 'email']);
     }
 
-    public function comentarios()
+    public function comments()
     {
-        return $this->hasMany(Comentario::class);
+        return $this->hasMany(Comment::class);
     }
 
-    public function likes() 
+    public function likes()
     {
         return $this->hasMany(Like::class);
     }
 
-    public function checkLike(User $user) 
+    public function checkLike(User $user)
     {
         return $this->likes->contains('user_id', $user->id);
     }

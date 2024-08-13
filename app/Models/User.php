@@ -3,14 +3,15 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -22,7 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'username',
-        'imagen'
+        'image',
     ];
 
     /**
@@ -36,42 +37,50 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be cast.
+     * Get the attributes that should be cast.
      *
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
 
-    public function posts() 
+    public function posts()
     {
         return $this->hasMany(Post::class);
     }
 
-    public function comentarios()
+    public function comments()
     {
-        return $this->hasMany(Comentario::class);
+        return $this->hasMany(Comment::class);
     }
 
-    public function likes() 
+    public function likes()
     {
         return $this->hasMany(Like::class);
     }
 
     public function followers()
     {
-        return $this->belongsToMany(User::class, 'followers', 'user_id', 'follower_id');
-    }
-   
-    public function followings()
-    {
-        return $this->belongsToMany(User::class, 'followers', 'follower_id', 'user_id');
+        return $this->belongsToMany(User::class, 'followers', 'user_id', 'follower_id')->withPivot(['id']);	
     }
 
-    public function siguiendo(User $user)
+    public function followings()
     {
-        return $this->followers->contains($user->id);
+        return $this->belongsToMany(User::class, 'followers', 'follower_id', 'user_id')->withPivot(['id']);
+    }
+
+    public function following(User $user)
+    {
+        return $this->followers->contains('id', $user->id);
+    } 
+
+    public function follower(User $user)
+    {
+        return $this->followers()->where('follower_id', $user->id)->first();
     }
 }

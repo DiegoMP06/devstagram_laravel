@@ -1,53 +1,47 @@
 <?php
 
-use App\Http\Controllers\ComentarioController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FollowerController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ImagenController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\LikeController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\LogoutController;
-use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PostController;
-use App\Http\Controllers\RegisterController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+Route::middleware(['auth', 'verified'])->group(function() {
 
-Route::get('/', HomeController::class)->name('home');
+    Route::get('/', HomeController::class)
+        ->name('home');
 
-Route::get('/register', [RegisterController::class, 'index'])->name("register");
-Route::post('/register', [RegisterController::class, 'store']);
+    Route::post('/images', [ImageController::class, 'store'])
+        ->name('images.store');
 
-Route::get('/login', [LoginController::class, 'index'])->name("login");
-Route::post('/login', [LoginController::class, 'store']);
+    Route::resource('/posts/{post}/likes', LikeController::class)
+        ->only(['store', 'destroy'])
+        ->names([
+            'store' => 'posts.likes.store', 
+            'destroy' => 'posts.likes.destroy'
+        ]);
 
-Route::post('/logout', [LogoutController::class, 'store'])->name('logout');
+    Route::resource('/{user:username}/posts', PostController::class)
+        ->except(['show', 'index']);
 
-Route::get('/editar-perfil', [PerfilController::class, 'index'])->name('perfil.index');
-Route::post('/editar-perfil', [PerfilController::class, 'store'])->name('perfil.store');
+    Route::post('/{user:username}/posts/{post}/comments', [CommentController::class, 'store'])
+        ->name('comments.store');
 
-Route::post('/imagenes', [ImagenController::class, 'store'])->name('imagenes.store');
+    Route::resource('/{user:username}/followers', FollowerController::class)
+        ->only(['store', 'destroy'])
+        ->names([
+            'store' => 'users.follows.store', 
+            'destroy' => 'users.follows.destroy'
+        ]);
+});
 
-Route::post('/post/{post}/likes', [LikeController::class, 'store'])->name('post.likes.store');
-Route::delete('/post/{post}/likes', [LikeController::class, 'destroy'])->name('post.likes.destroy');
+Route::resource('/{user:username}/posts', PostController::class)
+    ->only(['show', 'index']);
 
-Route::get('/posts/create', [PostController::class, 'create'])->name('post.create');
-Route::get('/posts/{user:username}', [PostController::class , 'index'])->name('post.index'); 
-Route::post('/posts', [PostController::class, 'store'])->name('post.store');
-Route::get('/posts/{user:username}/{post}', [PostController::class, 'show'])->name('post.show');
-Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('post.destroy');
+Route::view('profile', 'profile')
+    ->middleware(['auth'])
+    ->name('profile');
 
-Route::post('/posts/{user:username}/{post}', [ComentarioController::class, 'store'])->name('comentarios.store');
-
-Route::post('/{user:username}/follow', [FollowerController::class, 'store'])->name('users.follows.store');
-Route::delete('/{user:username}/unfollow', [FollowerController::class, 'destroy'])->name('users.follows.destroy');
+require __DIR__.'/auth.php';

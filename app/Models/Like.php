@@ -11,15 +11,15 @@ class Like extends Model
 
     protected $fillable = [
         'user_id',
-        'post_id',
+        'post_id'
     ];
 
-    public function user() 
+    public function user()
     {
-        return $this->belongsTo(User::class)->select(['name', 'username', 'email']);
+        return $this->belongsTo(User::class);
     }
 
-    public function post() 
+    public function post()
     {
         return $this->belongsTo(Post::class);
     }
